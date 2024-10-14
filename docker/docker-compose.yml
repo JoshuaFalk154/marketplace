@@ -1,0 +1,11 @@
+services:
+  marketplace-postgres:
+    image: postgres
+    ports:
+      - "5000:5432"
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=marketplace
+    volumes:
+      - ./marketplace/postgres_data:/var/lib/postgresql/data
