@@ -19,6 +19,8 @@ target/
 *.iml
 *.ipr
 docker/marketplace
+docker/
+!docker/keycloak/realms
 
 ### NetBeans ###
 /nbproject/private/
