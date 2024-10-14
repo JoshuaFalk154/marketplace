@@ -18,8 +18,14 @@ target/
 *.iws
 *.iml
 *.ipr
+
+# my own
 /docker/*
+!docker/keycloak
+
+docker/keycloak/*
 !docker/keycloak/realms/
+
 
 ### NetBeans ###
 /nbproject/private/
