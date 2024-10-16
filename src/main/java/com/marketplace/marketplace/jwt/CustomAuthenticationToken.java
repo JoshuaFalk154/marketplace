@@ -17,7 +17,6 @@ public class CustomAuthenticationToken extends AbstractAuthenticationToken {
         this.principle = principle;
     }
 
-
     @Override
     public Object getCredentials() {
         return null;
