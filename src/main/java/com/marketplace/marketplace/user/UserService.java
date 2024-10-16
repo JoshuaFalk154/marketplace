@@ -11,8 +11,8 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-    public Optional<User> findBySud(String sud) {
-        return userRepository.findBySud(sud);
+    public Optional<User> findBySub(String sub) {
+        return userRepository.findBySub(sub);
     }
 
     public User saveUser(User user) {

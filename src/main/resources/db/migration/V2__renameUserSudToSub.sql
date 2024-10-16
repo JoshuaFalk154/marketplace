@@ -1,0 +1,2 @@
+ALTER TABLE IF EXISTS users
+RENAME COLUMN sud to sub;

@@ -43,30 +43,18 @@ public class JwtAuthConverter implements Converter<Jwt, AbstractAuthenticationTo
     }
 
     private User loadUser(Jwt jwt) {
-
-        String sud = extractSub(jwt);
-        Optional<User> optionalUser = userService.findBySud(sud);
+        String sub = jwt.getClaim("sub");
+        Optional<User> optionalUser = userService.findBySub(sub);
         if (optionalUser.isPresent()) {
             return optionalUser.get();
         }
 
         User user = User.builder()
-                .email(extractEmail(jwt))
-                .sud(extractSub(jwt))
+                .email(jwt.getClaim("email"))
+                .sub(sub)
                 .build();
 
         return userService.saveUser(user);
-    }
-
-
-    private String extractEmail(Jwt jwt) {
-        String email = jwt.getClaim("email");
-        return email;
-    }
-
-    private String extractSub(Jwt jwt) {
-        String sud = jwt.getClaim("sub");
-        return sud;
     }
 
 

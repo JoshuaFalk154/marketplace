@@ -26,7 +26,7 @@ public class User {
     private Long id;
 
     @Column(nullable = false, unique = true)
-    private String sud;
+    private String sub;
 
     @Column(nullable = false, unique = true)
     private String email;
