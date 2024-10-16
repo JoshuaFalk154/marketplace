@@ -15,4 +15,7 @@ public class UserService {
         return userRepository.findBySud(sud);
     }
 
+    public User saveUser(User user) {
+        return userRepository.save(user);
+    }
 }

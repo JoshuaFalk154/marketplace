@@ -1,5 +1,8 @@
 package com.marketplace.marketplace.jwt;
 
+import com.marketplace.marketplace.user.User;
+import com.marketplace.marketplace.user.UserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.lang.NonNull;
@@ -7,28 +10,65 @@ import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
+@RequiredArgsConstructor
 public class JwtAuthConverter implements Converter<Jwt, AbstractAuthenticationToken> {
+
+    private final UserService userService;
+    private final JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter =
+            new JwtGrantedAuthoritiesConverter();
 
     @Value("${jwt.auth.converter.resource-id}")
     private String resourceId;
 
 
     @Override
-    public AbstractAuthenticationToken convert(@NonNull Jwt source) {
-        AbstractAuthenticationToken token = new CustomAuthenticationToken("someprincple", extractResourceRoles(source));
+    public AbstractAuthenticationToken convert(@NonNull Jwt jwt) {
+        User user = loadUser(jwt);
+        Collection<GrantedAuthority> authorities = Stream.concat(
+                jwtGrantedAuthoritiesConverter.convert(jwt).stream(),
+                extractResourceRoles(jwt).stream()
+        ).collect(Collectors.toSet());
+
+        AbstractAuthenticationToken token = new CustomAuthenticationToken(user, authorities);
         token.setAuthenticated(true);
         return token;
     }
+
+    private User loadUser(Jwt jwt) {
+
+        String sud = extractSub(jwt);
+        Optional<User> optionalUser = userService.findBySud(sud);
+        if (optionalUser.isPresent()) {
+            return optionalUser.get();
+        }
+
+        User user = User.builder()
+                .email(extractEmail(jwt))
+                .sud(extractSub(jwt))
+                .build();
+
+        return userService.saveUser(user);
+    }
+
+
+    private String extractEmail(Jwt jwt) {
+        String email = jwt.getClaim("email");
+        return email;
+    }
+
+    private String extractSub(Jwt jwt) {
+        String sud = jwt.getClaim("sub");
+        return sud;
+    }
+
 
     private Collection<? extends GrantedAuthority> extractResourceRoles(Jwt jwt) {
         Map<String, Object> resourceAccess;
