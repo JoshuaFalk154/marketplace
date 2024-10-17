@@ -64,5 +64,4 @@ public class UserServiceTest {
                 Arguments.of("sud", "nomail", UserInvalidArgumentsException.class)
         );
     }
-
 }
