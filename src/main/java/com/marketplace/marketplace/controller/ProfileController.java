@@ -26,6 +26,7 @@ public class ProfileController {
     @GetMapping
     public ResponseEntity<UserRequested> getUser() {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        userService.loadUserEntities(user);
         UserRequested userRequested = mapper.userToUserRequested(user);
         return new ResponseEntity<>(userRequested, HttpStatus.OK);
     }
