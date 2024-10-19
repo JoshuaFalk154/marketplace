@@ -8,6 +8,7 @@ import com.marketplace.marketplace.order.Order;
 import com.marketplace.marketplace.product.Product;
 import com.marketplace.marketplace.rating.Rating;
 import com.marketplace.marketplace.user.User;
+import org.mapstruct.Mapping;
 
 @org.mapstruct.Mapper
 public interface Mapper {
