@@ -1,9 +1,6 @@
 package com.marketplace.marketplace.utils;
 
-import com.marketplace.marketplace.DTO.OrderNested;
-import com.marketplace.marketplace.DTO.ProductNested;
-import com.marketplace.marketplace.DTO.RatingNested;
-import com.marketplace.marketplace.DTO.UserRequested;
+import com.marketplace.marketplace.DTO.*;
 import com.marketplace.marketplace.order.Order;
 import com.marketplace.marketplace.product.Product;
 import com.marketplace.marketplace.rating.Rating;
@@ -24,4 +21,5 @@ public interface Mapper {
     ProductNested productToProductNested(Product product);
     Product productNestedToProduct(ProductNested productNested);
 
+    UserResponse userToUserResponse(User user);
 }
