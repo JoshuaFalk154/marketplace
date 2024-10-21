@@ -3,6 +3,7 @@ package com.marketplace.marketplace.product;
 import com.marketplace.marketplace.rating.Rating;
 import com.marketplace.marketplace.user.User;
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
@@ -15,6 +16,7 @@ import java.util.List;
 @Table(name = "products")
 @Getter
 @Setter
+@Builder
 public class Product {
 
     @Id

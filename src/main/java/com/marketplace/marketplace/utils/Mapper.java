@@ -22,4 +22,8 @@ public interface Mapper {
     Product productNestedToProduct(ProductNested productNested);
 
     UserResponse userToUserResponse(User user);
+
+    ProductResponse productToProductResponse(Product product);
+
+    Product productCreateToProduct(ProductCreate productCreate);
 }
