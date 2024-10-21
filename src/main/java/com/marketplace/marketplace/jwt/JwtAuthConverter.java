@@ -36,6 +36,7 @@ public class JwtAuthConverter implements Converter<Jwt, AbstractAuthenticationTo
                 jwtGrantedAuthoritiesConverter.convert(jwt).stream(),
                 extractResourceRoles(jwt).stream()
         ).collect(Collectors.toSet());
+        user.setRoles(authorities.stream().toList());
 
         AbstractAuthenticationToken token = new CustomAuthenticationToken(user, authorities);
         token.setAuthenticated(true);
