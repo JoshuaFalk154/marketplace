@@ -9,6 +9,7 @@ import com.marketplace.marketplace.utils.Mapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -26,6 +27,7 @@ public class ProductController {
     // TODO
     // add checks for ROLE seller/admin
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ProductResponse> createProduct(@AuthenticationPrincipal User user, @RequestBody ProductCreate productCreate) {
         Product createdProduct = productService.createProduct(user, productCreate);
 
