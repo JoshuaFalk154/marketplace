@@ -2,11 +2,10 @@ package com.marketplace.marketplace.product;
 
 import com.marketplace.marketplace.DTO.ProductCreate;
 import com.marketplace.marketplace.exceptions.InvalidArgumentsException;
+import com.marketplace.marketplace.exceptions.ProductAlreadyExists;
 import com.marketplace.marketplace.user.User;
 import com.marketplace.marketplace.utils.Mapper;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -26,15 +25,19 @@ public class ProductService {
         Product product = mapper.productCreateToProduct(productCreate);
         product.setSeller(seller);
 
+        if (productExists(product)) {
+            throw new ProductAlreadyExists("product with following id already exists: " + product.getProductId());
+        }
+
         return saveProduct(product);
     }
 
     public Product saveProduct(Product product) {
-        Product checkedProduct = checkProduct(product);
+        checkProduct(product);
         return productRepository.save(product);
     }
 
-    private Product checkProduct(Product product) {
+    private void checkProduct(Product product) {
         if (product.getProductId() == null || product.getProductId().isBlank()) {
             throw new InvalidArgumentsException("product id is invalid");
         }
@@ -51,6 +54,9 @@ public class ProductService {
             throw new InvalidArgumentsException("product price is invalid");
         }
 
-        return product;
+    }
+
+    public boolean productExists(Product product) {
+        return productRepository.findByIdOrProductId(product.getId(), product.getProductId()).isPresent();
     }
 }
