@@ -45,7 +45,14 @@ public class ProductController {
         List<ProductRequested> response = mapper.listProductsToListProductRequested(products);
 
         return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<ProductRequested> getProductByProductId(@PathVariable String id) {
+        Product product = productService.getProductByProductId(id);
+        ProductRequested response = mapper.productToProductRequested(product);
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
 }

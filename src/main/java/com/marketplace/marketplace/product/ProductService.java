@@ -3,6 +3,7 @@ package com.marketplace.marketplace.product;
 import com.marketplace.marketplace.DTO.ProductCreate;
 import com.marketplace.marketplace.exceptions.InvalidArgumentsException;
 import com.marketplace.marketplace.exceptions.ProductAlreadyExists;
+import com.marketplace.marketplace.exceptions.ResourceNotFoundException;
 import com.marketplace.marketplace.user.User;
 import com.marketplace.marketplace.utils.Mapper;
 import lombok.RequiredArgsConstructor;
@@ -67,9 +68,16 @@ public class ProductService {
         String queryTitle = title.orElse("");
 
         if (maxPrice.isPresent() && maxPrice.get() > 0) {
-            return productRepository.findByTitleContainingAndPriceLessThan(queryTitle, maxPrice.get(), Limit.of(querySize));
+            return productRepository.findByTitleContainingAndPriceLessThanEqual(queryTitle, maxPrice.get(), Limit.of(querySize));
         }
 
         return productRepository.findByTitleContaining(queryTitle, Limit.of(querySize));
     }
+
+    public Product getProductByProductId(String productId) {
+        return productRepository.findByProductId(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("product with id: " + productId + " does not exist"));
+    }
+
+
 }

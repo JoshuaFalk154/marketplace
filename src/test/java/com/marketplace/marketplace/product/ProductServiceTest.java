@@ -3,11 +3,10 @@ package com.marketplace.marketplace.product;
 import com.marketplace.marketplace.DTO.ProductCreate;
 import com.marketplace.marketplace.exceptions.InvalidArgumentsException;
 import com.marketplace.marketplace.exceptions.ProductAlreadyExists;
+import com.marketplace.marketplace.exceptions.ResourceNotFoundException;
 import com.marketplace.marketplace.user.User;
 import com.marketplace.marketplace.utils.Mapper;
 import com.marketplace.marketplace.utils.MapperImpl;
-import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -20,7 +19,6 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Limit;
 
-import javax.swing.text.html.Option;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
@@ -149,7 +147,7 @@ public class ProductServiceTest {
 
         productService.getProductsWithParams(size, title, maxPrice);
 
-        verify(productRepository).findByTitleContainingAndPriceLessThan(
+        verify(productRepository).findByTitleContainingAndPriceLessThanEqual(
                 eq(wantTitle), eq(wantPrize), eq(Limit.of(wantSize))
         );
         verifyNoMoreInteractions(productRepository);
@@ -191,6 +189,34 @@ public class ProductServiceTest {
                 Arguments.of(Optional.of(125), Optional.of("title"), Optional.of(-1.0),
                         50, "title", 1.0)
         );
+    }
+
+    @Test
+    void getProductByProductId_ProductExistsAndValidId_Product() {
+        String productId = "";
+        Product product = Product.builder()
+                .productId(productId)
+                .title("someTitle")
+                .build();
+
+        doReturn(Optional.of(product)).when(productRepository).findByProductId(any(String.class));
+
+        Product result = productService.getProductByProductId(productId);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getProductId()).isEqualTo(productId);
+        assertThat(result.getTitle()).isEqualTo(product.getTitle());
+    }
+
+    @Test
+    void getProductByProductId_ProductWithIdNotExist_Exception() {
+        String productId = "";
+        Exception expectedException = new ResourceNotFoundException("");
+
+        doReturn(Optional.empty()).when(productRepository).findByProductId(any(String.class));
+
+        assertThatThrownBy(() -> productService.getProductByProductId(productId))
+                .isInstanceOf(expectedException.getClass());
     }
 
 
