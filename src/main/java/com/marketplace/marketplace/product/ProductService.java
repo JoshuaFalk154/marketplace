@@ -6,9 +6,11 @@ import com.marketplace.marketplace.exceptions.ProductAlreadyExists;
 import com.marketplace.marketplace.user.User;
 import com.marketplace.marketplace.utils.Mapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -58,5 +60,16 @@ public class ProductService {
 
     public boolean productExists(Product product) {
         return productRepository.findByIdOrProductId(product.getId(), product.getProductId()).isPresent();
+    }
+
+    public List<Product> getProductsWithParams(Optional<Integer> size, Optional<String> title, Optional<Double> maxPrice) {
+        int querySize = size.map(s -> Math.min(s, 50)).orElse(50);
+        String queryTitle = title.orElse("");
+
+        if (maxPrice.isPresent() && maxPrice.get() > 0) {
+            return productRepository.findByTitleContainingAndPriceLessThan(queryTitle, maxPrice.get(), Limit.of(querySize));
+        }
+
+        return productRepository.findByTitleContaining(queryTitle, Limit.of(querySize));
     }
 }

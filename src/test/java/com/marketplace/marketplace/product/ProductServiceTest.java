@@ -18,18 +18,20 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Limit;
 
+import javax.swing.text.html.Option;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class ProductServiceTest {
@@ -138,6 +140,57 @@ public class ProductServiceTest {
 
         assertThatThrownBy(() -> productServiceMock.createProduct(seller, createProduct))
                 .isInstanceOf(ProductAlreadyExists.class);
+    }
+
+    @ParameterizedTest
+    @MethodSource("ProductServiceGetProductsWithParams_WithMaxPrice_CallsCorrectRepositoryMethod_Values")
+    void ProductServiceGetProductsWithParams_WithMaxPrice_CallsCorrectRepositoryMethod(Optional<Integer> size, Optional<String> title, Optional<Double> maxPrice,
+                                                                                       int wantSize, String wantTitle, Double wantPrize) {
+
+        productService.getProductsWithParams(size, title, maxPrice);
+
+        verify(productRepository).findByTitleContainingAndPriceLessThan(
+                eq(wantTitle), eq(wantPrize), eq(Limit.of(wantSize))
+        );
+        verifyNoMoreInteractions(productRepository);
+    }
+
+    public static Stream<Arguments> ProductServiceGetProductsWithParams_WithMaxPrice_CallsCorrectRepositoryMethod_Values() {
+        return Stream.of(
+                Arguments.of(Optional.of(45), Optional.of("title"), Optional.of(150.0),
+                        45, "title", 150.0),
+                Arguments.of(Optional.of(125), Optional.of("title"), Optional.of(1.0),
+                        50, "title", 1.0),
+                Arguments.of(Optional.empty(), Optional.of("title"), Optional.of(1.0),
+                        50, "title", 1.0),
+
+                Arguments.of(Optional.of(45), Optional.empty(), Optional.of(1.0),
+                        45, "", 1.0),
+                Arguments.of(Optional.of(45), Optional.of("title"), Optional.of(150.0),
+                        45, "title", 150.0)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("ProductServiceGetProductsWithParams_InvalidOrEmptyMaxPrice_List_Values")
+    void ProductServiceGetProductsWithParams_InvalidOrEmptyMaxPrice_List(Optional<Integer> size, Optional<String> title, Optional<Double> maxPrice,
+                                                                         int wantSize, String wantTitle) {
+
+        productService.getProductsWithParams(size, title, maxPrice);
+
+        verify(productRepository).findByTitleContaining(
+                eq(wantTitle), eq(Limit.of(wantSize))
+        );
+        verifyNoMoreInteractions(productRepository);
+    }
+
+    public static Stream<Arguments> ProductServiceGetProductsWithParams_InvalidOrEmptyMaxPrice_List_Values() {
+        return Stream.of(
+                Arguments.of(Optional.of(125), Optional.of("title"), Optional.empty(),
+                        50, "title", 1.0),
+                Arguments.of(Optional.of(125), Optional.of("title"), Optional.of(-1.0),
+                        50, "title", 1.0)
+        );
     }
 
 

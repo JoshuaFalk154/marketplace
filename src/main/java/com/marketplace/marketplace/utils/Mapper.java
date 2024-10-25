@@ -7,6 +7,8 @@ import com.marketplace.marketplace.rating.Rating;
 import com.marketplace.marketplace.user.User;
 import org.mapstruct.Mapping;
 
+import java.util.List;
+
 @org.mapstruct.Mapper
 public interface Mapper {
     UserRequested userToUserRequested(User user);
@@ -26,4 +28,8 @@ public interface Mapper {
     ProductResponse productToProductResponse(Product product);
 
     Product productCreateToProduct(ProductCreate productCreate);
+
+    ProductRequested productToProductRequested(Product product);
+
+    List<ProductRequested> listProductsToListProductRequested(List<Product> products);
 }

@@ -1,6 +1,7 @@
 package com.marketplace.marketplace.controller;
 
 import com.marketplace.marketplace.DTO.ProductCreate;
+import com.marketplace.marketplace.DTO.ProductRequested;
 import com.marketplace.marketplace.DTO.ProductResponse;
 import com.marketplace.marketplace.product.Product;
 import com.marketplace.marketplace.product.ProductService;
@@ -11,10 +12,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
@@ -24,15 +25,27 @@ public class ProductController {
     private final ProductService productService;
     private final Mapper mapper;
 
-    // TODO
-    // add checks for ROLE seller/admin
+
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('SELLER')")
     public ResponseEntity<ProductResponse> createProduct(@AuthenticationPrincipal User user, @RequestBody ProductCreate productCreate) {
         Product createdProduct = productService.createProduct(user, productCreate);
 
         ProductResponse response = mapper.productToProductResponse(createdProduct);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+
+    @GetMapping
+    public ResponseEntity<List<ProductRequested>> getProducts(@RequestParam Optional<Integer> size,
+                                                              @RequestParam Optional<String> title,
+                                                              @RequestParam Optional<Double> maxPrice) {
+
+        List<Product> products = productService.getProductsWithParams(size, title, maxPrice);
+        List<ProductRequested> response = mapper.listProductsToListProductRequested(products);
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+
     }
 
 }
