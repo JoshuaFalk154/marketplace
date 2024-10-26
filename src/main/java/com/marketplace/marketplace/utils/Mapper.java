@@ -32,4 +32,8 @@ public interface Mapper {
     ProductRequested productToProductRequested(Product product);
 
     List<ProductRequested> listProductsToListProductRequested(List<Product> products);
+
+    ProductUpdated productToProductUpdated(Product product);
+
+    Product productUpdateToProduct(ProductUpdate productUpdate);
 }

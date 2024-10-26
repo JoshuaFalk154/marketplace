@@ -1,11 +1,14 @@
 package com.marketplace.marketplace.product;
 
 import com.marketplace.marketplace.DTO.ProductCreate;
+import com.marketplace.marketplace.DTO.ProductUpdate;
 import com.marketplace.marketplace.exceptions.InvalidArgumentsException;
 import com.marketplace.marketplace.exceptions.ProductAlreadyExists;
 import com.marketplace.marketplace.exceptions.ResourceNotFoundException;
+import com.marketplace.marketplace.exceptions.ResourceNotOwnerException;
 import com.marketplace.marketplace.user.User;
 import com.marketplace.marketplace.utils.Mapper;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
@@ -40,24 +43,37 @@ public class ProductService {
         return productRepository.save(product);
     }
 
-    private void checkProduct(Product product) {
-        if (product.getProductId() == null || product.getProductId().isBlank()) {
+    public void checkProduct(Product product) {
+        checkProductId(product.getProductId());
+        checkTitle(product.getTitle());
+        checkDescription(product.getDescription());
+        checkPrice(product.getPrice());
+    }
+
+    public void checkProductId(String productId) {
+        if (productId == null || productId.isBlank()) {
             throw new InvalidArgumentsException("product id is invalid");
         }
+    }
 
-        if (product.getTitle() == null || product.getTitle().isBlank()) {
+    public void checkTitle(String title) {
+        if (title == null || title.isBlank()) {
             throw new InvalidArgumentsException("product title is invalid");
         }
+    }
 
-        if (product.getDescription() == null || product.getDescription().isBlank()) {
+    public void checkDescription(String description) {
+        if (description == null || description.isBlank()) {
             throw new InvalidArgumentsException("product description is invalid");
         }
+    }
 
-        if (product.getPrice() == null || product.getPrice() <= 0) {
+    public void checkPrice(Double price) {
+        if (price == null || price <= 0) {
             throw new InvalidArgumentsException("product price is invalid");
         }
-
     }
+
 
     public boolean productExists(Product product) {
         return productRepository.findByIdOrProductId(product.getId(), product.getProductId()).isPresent();
@@ -80,4 +96,25 @@ public class ProductService {
     }
 
 
+    @Transactional
+    public void checkOwnership(User user, Product product) {
+        User owner = product.getSeller();
+        if (!product.getSeller().equals(user)) {
+            throw new ResourceNotOwnerException("user with sub " + user.getSub() + " does not own product with id: " + product.getProductId());
+        }
+    }
+
+    public Product updateProductAsOwner(User user, String id, ProductUpdate update) {
+        Product product = getProductByProductId(id);
+        checkOwnership(user, product);
+
+        checkTitle(update.getTitle());
+        checkDescription(update.getDescription());
+        checkPrice(update.getPrice());
+        product.setTitle(update.getTitle());
+        product.setDescription(update.getDescription());
+        product.setPrice(update.getPrice());
+
+        return saveProduct(product);
+    }
 }

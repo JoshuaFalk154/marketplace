@@ -1,9 +1,11 @@
 package com.marketplace.marketplace.product;
 
 import com.marketplace.marketplace.DTO.ProductCreate;
+import com.marketplace.marketplace.DTO.ProductUpdate;
 import com.marketplace.marketplace.exceptions.InvalidArgumentsException;
 import com.marketplace.marketplace.exceptions.ProductAlreadyExists;
 import com.marketplace.marketplace.exceptions.ResourceNotFoundException;
+import com.marketplace.marketplace.exceptions.ResourceNotOwnerException;
 import com.marketplace.marketplace.user.User;
 import com.marketplace.marketplace.utils.Mapper;
 import com.marketplace.marketplace.utils.MapperImpl;
@@ -27,7 +29,6 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -42,6 +43,7 @@ public class ProductServiceTest {
 
     @Spy
     Mapper mapper = new MapperImpl();
+
 
     @Test
     void ProductServiceCreateProduct_ValidProduct_CreatedProduct() {
@@ -217,6 +219,149 @@ public class ProductServiceTest {
 
         assertThatThrownBy(() -> productService.getProductByProductId(productId))
                 .isInstanceOf(expectedException.getClass());
+    }
+
+    @Test
+    void updateProductAsOwner_AllValid_UpdatedProduct() {
+        String productId = "product1";
+
+        User owner = User.builder().id(1L).sub("sub").email("mail@mail.com").build();
+        Product product = Product.builder()
+                .id(1L)
+                .productId(productId)
+                .title("title")
+                .description("description")
+                .price(29.99)
+                .build();
+
+        ProductUpdate productUpdate = ProductUpdate.builder()
+                .title("newTitle")
+                .description("newDescription")
+                .price(300.24)
+                .build();
+
+        Product updatedProduct = Product.builder()
+                .id(product.getId())
+                .productId(product.getProductId())
+                .title(productUpdate.getTitle())
+                .description(productUpdate.getDescription())
+                .price(productUpdate.getPrice())
+                .build();
+
+        ProductService productServiceMock = Mockito.spy(productService);
+        doReturn(product).when(productServiceMock).getProductByProductId(any(String.class));
+        doNothing().when(productServiceMock).checkOwnership(any(User.class), any(Product.class));
+        doAnswer(invocation -> invocation.getArgument(0)).when(productServiceMock).saveProduct(any(Product.class));
+
+        Product result = productServiceMock.updateProductAsOwner(owner, product.getProductId(), productUpdate);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getTitle()).isEqualTo(updatedProduct.getTitle());
+        assertThat(result.getDescription()).isEqualTo(updatedProduct.getDescription());
+        assertThat(result.getPrice()).isEqualTo(updatedProduct.getPrice());
+    }
+
+    @Test
+    void updateProductAsOwner_InvalidId_Exception() {
+        User owner = User.builder().id(1L).sub("sub").email("mail@mail.com").build();
+
+        String productId = "product1";
+        Product product = Product.builder()
+                .id(1L)
+                .productId(productId)
+                .title("title")
+                .description("description")
+                .price(29.99)
+                .seller(owner)
+                .build();
+        owner.setProducts(List.of(product));
+
+        ProductUpdate productUpdate = ProductUpdate.builder()
+                .title("newTitle")
+                .description("newDescription")
+                .price(300.24)
+                .build();
+
+
+        ProductService productServiceMock = Mockito.spy(productService);
+
+        doThrow(new ResourceNotFoundException("")).when(productServiceMock).getProductByProductId(any(String.class));
+
+        assertThatThrownBy(() -> productServiceMock.updateProductAsOwner(owner, "wrongid", productUpdate));
+
+    }
+
+    @Test
+    void updateProductAsOwner_NotOwner_Exception() {
+        Exception expectedException = new ResourceNotOwnerException("");
+
+        User notOwner = User.builder().id(1L).sub("sub").email("mail@mail.com").build();
+
+        String productId = "product1";
+        Product product = Product.builder()
+                .id(1L)
+                .productId(productId)
+                .title("title")
+                .description("description")
+                .price(29.99)
+                .build();
+
+        ProductUpdate productUpdate = ProductUpdate.builder()
+                .title("newTitle")
+                .description("newDescription")
+                .price(300.24)
+                .build();
+
+        ProductService productServiceMock = Mockito.spy(productService);
+
+        doReturn(product).when(productServiceMock).getProductByProductId(productId);
+        doThrow(new ResourceNotOwnerException("")).when(productServiceMock).checkOwnership(any(User.class), any(Product.class));
+
+        assertThatThrownBy(() -> productServiceMock.updateProductAsOwner(notOwner, productId, productUpdate))
+                .isInstanceOf(expectedException.getClass());
+    }
+
+    @ParameterizedTest
+    @MethodSource("updateProductAsOwner_InvalidProductUpdate_Exception_Values")
+    void updateProductAsOwner_InvalidProductUpdate_Exception(String title, String description, Double price) {
+        Exception expectedException = new InvalidArgumentsException("");
+
+        User owner = User.builder().id(1L).sub("sub").email("mail@mail.com").build();
+        String productId = "product1";
+
+        Product product = Product.builder()
+                .id(1L)
+                .productId(productId)
+                .title("title")
+                .description("description")
+                .price(29.99)
+                .build();
+
+        ProductUpdate productUpdate = ProductUpdate.builder()
+                .title(title)
+                .description(description)
+                .price(price)
+                .build();
+
+        ProductService productServiceMock = Mockito.spy(productService);
+        doReturn(product).when(productServiceMock).getProductByProductId(any(String.class));
+        doNothing().when(productServiceMock).checkOwnership(any(User.class), any(Product.class));
+
+        assertThatThrownBy(() -> productServiceMock.updateProductAsOwner(owner, productId, productUpdate))
+                .isInstanceOf(expectedException.getClass());
+
+    }
+
+    public static Stream<Arguments> updateProductAsOwner_InvalidProductUpdate_Exception_Values() {
+        return Stream.of(
+                Arguments.of(" ", "description", 20.4),
+                Arguments.of(null, "description", 20.4),
+                Arguments.of("title", " ", 20.4),
+                Arguments.of("title", null, 20.4),
+                Arguments.of("title", "description", -1.4),
+                Arguments.of("title", "description", 0.0),
+                Arguments.of("title", "description", null)
+        );
     }
 
 

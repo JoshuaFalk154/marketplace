@@ -1,8 +1,6 @@
 package com.marketplace.marketplace.controller;
 
-import com.marketplace.marketplace.DTO.ProductCreate;
-import com.marketplace.marketplace.DTO.ProductRequested;
-import com.marketplace.marketplace.DTO.ProductResponse;
+import com.marketplace.marketplace.DTO.*;
 import com.marketplace.marketplace.product.Product;
 import com.marketplace.marketplace.product.ProductService;
 import com.marketplace.marketplace.user.User;
@@ -54,5 +52,14 @@ public class ProductController {
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ProductUpdated> updateProduct(@AuthenticationPrincipal User user,@PathVariable String id, @RequestBody ProductUpdate update) {
+        Product updatedProduct = productService.updateProductAsOwner(user, id, update);
+        ProductUpdated result = mapper.productToProductUpdated(updatedProduct);
+
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
 
 }
