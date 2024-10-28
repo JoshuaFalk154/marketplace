@@ -364,5 +364,61 @@ public class ProductServiceTest {
         );
     }
 
+    @Test
+    void deleteProductAsOwner_AllValid_NoException() {
+        User owner = User.builder().id(1L).sub("sub").email("mail@mail.com").build();
+        String productId = "product1";
 
+        Product product = Product.builder()
+                .id(1L)
+                .productId(productId)
+                .title("title")
+                .description("description")
+                .price(29.99)
+                .build();
+
+        ProductService productServiceMock = Mockito.spy(productService);
+
+        doReturn(product).when(productServiceMock).getProductByProductId(any(String.class));
+        doNothing().when(productServiceMock).checkOwnership(any(User.class), any(Product.class));
+        doNothing().when(productRepository).delete(any(Product.class));
+
+        productServiceMock.deleteProductAsOwner(owner, productId);
+    }
+
+    @Test
+    void deleteProductAsOwner_ProductNotExisting_Exception() {
+        User owner = User.builder().id(1L).sub("sub").email("mail@mail.com").build();
+        String productId = "product1";
+
+        ProductService productServiceMock = Mockito.spy(productService);
+
+        doThrow(new ResourceNotFoundException("")).when(productServiceMock).getProductByProductId(any(String.class));
+
+        assertThatThrownBy(() -> productServiceMock.deleteProductAsOwner(owner, productId));
+    }
+
+    @Test
+    void deleteProductAsOwner_UserNotOwner_Exception() {
+        User owner = User.builder().id(1L).sub("sub").email("mail@mail.com").build();
+        User notOwner = User.builder().id(2L).sub("subNotOwner").email("mail@notOwner.com").build();
+
+        String productId = "product1";
+
+        Product product = Product.builder()
+                .id(1L)
+                .productId(productId)
+                .title("title")
+                .description("description")
+                .price(29.99)
+                .seller(owner)
+                .build();
+
+        ProductService productServiceMock = Mockito.spy(productService);
+
+        doReturn(product).when(productServiceMock).getProductByProductId(product.getProductId());
+        doThrow(new ResourceNotOwnerException("")).when(productServiceMock).checkOwnership(notOwner, product);
+
+        assertThatThrownBy(() -> productServiceMock.deleteProductAsOwner(notOwner, productId));
+    }
 }

@@ -117,4 +117,12 @@ public class ProductService {
 
         return saveProduct(product);
     }
+
+    @Transactional
+    public void deleteProductAsOwner(User user, String productId) {
+        Product product = getProductByProductId(productId);
+        checkOwnership(user, product);
+
+        productRepository.delete(product);
+    }
 }

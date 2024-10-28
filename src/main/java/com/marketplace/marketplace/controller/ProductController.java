@@ -62,5 +62,13 @@ public class ProductController {
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
+    @DeleteMapping("/{productId}")
+    @PreAuthorize("hasRole('SELLER')")
+    public ResponseEntity<String> deleteProduct(@AuthenticationPrincipal User user, @PathVariable String productId) {
+        productService.deleteProductAsOwner(user, productId);
+
+        return new ResponseEntity<>("Deleted product with id: " + productId, HttpStatus.OK);
+    }
+
 
 }
