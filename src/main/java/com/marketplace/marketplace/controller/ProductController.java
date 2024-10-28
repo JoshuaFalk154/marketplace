@@ -54,6 +54,7 @@ public class ProductController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('SELLER')")
     public ResponseEntity<ProductUpdated> updateProduct(@AuthenticationPrincipal User user,@PathVariable String id, @RequestBody ProductUpdate update) {
         Product updatedProduct = productService.updateProductAsOwner(user, id, update);
         ProductUpdated result = mapper.productToProductUpdated(updatedProduct);
