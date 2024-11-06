@@ -20,9 +20,10 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http.authorizeHttpRequests(authorize -> {
-                    authorize.requestMatchers("/hello").permitAll();
-            authorize.anyRequest().authenticated();
-        })
+                    authorize.requestMatchers("/orders").permitAll();
+                    authorize.requestMatchers("/payment/**").permitAll();
+                    authorize.anyRequest().authenticated();
+                })
                 .oauth2ResourceServer((oauth2) -> oauth2.jwt(jwt ->
                         jwt.jwtAuthenticationConverter(converter)
 
