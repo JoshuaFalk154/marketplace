@@ -1,6 +1,10 @@
 package com.marketplace.marketplace.controller;
 
+import com.marketplace.marketplace.DTO.OrderCreate;
+import com.marketplace.marketplace.order.Order;
+import com.marketplace.marketplace.order.OrderService;
 import com.marketplace.marketplace.payment.PaypalService;
+import com.marketplace.marketplace.user.User;
 import com.paypal.api.payments.Links;
 import com.paypal.api.payments.Payment;
 import com.paypal.base.rest.PayPalRESTException;
@@ -8,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -19,6 +24,14 @@ import java.net.URI;
 public class OrderController {
 
     private final PaypalService paypalService;
+    private final OrderService orderService;
+
+    @PostMapping
+    public ResponseEntity<String> createOrder(@AuthenticationPrincipal User user, @RequestBody OrderCreate orderCreate) {
+        Order order = orderService.createOrder(user, orderCreate);
+
+        return new ResponseEntity<>("order with ID: " + order.getOrderId() + " created successful" , HttpStatus.CREATED);
+    }
 
     @GetMapping
     public ResponseEntity<Void> placeOrder(

@@ -79,6 +79,10 @@ public class ProductService {
         return productRepository.findByIdOrProductId(product.getId(), product.getProductId()).isPresent();
     }
 
+    public boolean productExists(String productId) {
+        return productRepository.findByProductId(productId).isPresent();
+    }
+
     public List<Product> getProductsWithParams(Optional<Integer> size, Optional<String> title, Optional<Double> maxPrice) {
         int querySize = size.map(s -> Math.min(s, 50)).orElse(50);
         String queryTitle = title.orElse("");
