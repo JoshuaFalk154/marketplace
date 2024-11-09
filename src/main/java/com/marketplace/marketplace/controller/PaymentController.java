@@ -1,6 +1,9 @@
 package com.marketplace.marketplace.controller;
 
+import com.marketplace.marketplace.order.OrderService;
 import com.marketplace.marketplace.payment.PaypalService;
+import com.marketplace.marketplace.transaction.Transaction;
+import com.marketplace.marketplace.transaction.TransactionService;
 import com.paypal.api.payments.Payment;
 import com.paypal.base.rest.PayPalRESTException;
 import lombok.RequiredArgsConstructor;
@@ -17,12 +20,20 @@ import org.springframework.web.bind.annotation.RestController;
 public class PaymentController {
 
     private final PaypalService paypalService;
+    private final OrderService orderService;
+    private final TransactionService transactionService;
 
     @GetMapping("/success")
-    public String paymentSuccess(@RequestParam("paymentId") String paymentId, @RequestParam("PayerID") String payerId) {
+    public String paymentSuccess(@RequestParam("paymentId") String paymentId,
+                                 @RequestParam("PayerID") String payerId,
+                                 @RequestParam("transactionId") String transactionId)
+    {
         try {
             Payment payment = paypalService.executePayment(paymentId, payerId);
             if (payment.getState().equals("approved")) {
+                //TODO
+                // orderService.finalizeOrder(paymentId);
+                transactionService.transactionSuccess(transactionService.getTransactionByTransactionId(transactionId));
                 return "payment successful";
             }
         } catch (PayPalRESTException e) {
@@ -33,7 +44,8 @@ public class PaymentController {
     }
 
     @GetMapping("/cancel")
-    public String paymentCancel() {
+    public String paymentCancel(@RequestParam("transactionId") String transactionId) {
+        transactionService.transactionFail(transactionService.getTransactionByTransactionId(transactionId));
         return "payment canceled";
     }
 

@@ -2,6 +2,7 @@ package com.marketplace.marketplace.order;
 
 import com.marketplace.marketplace.DTO.OrderCreate;
 import com.marketplace.marketplace.exceptions.InvalidArgumentsException;
+import com.marketplace.marketplace.exceptions.ResourceNotFoundException;
 import com.marketplace.marketplace.product.Product;
 import com.marketplace.marketplace.product.ProductService;
 import com.marketplace.marketplace.user.User;
@@ -30,16 +31,23 @@ public class OrderService {
             throw new InvalidArgumentsException("order must contain at least one product");
         }
 
-        for (String productId: orderCreate.getProductIdQuantityMap().keySet() ) {
+        for (String productId : orderCreate.getProductIdQuantityMap().keySet()) {
             productService.getProductByProductId(productId);
         }
 
-        return Order.builder()
+        Order order = Order.builder()
                 .orderId(generateOrderId())
                 .status(OrderStatus.PENDING)
                 .owner(user)
                 .productIdQuantityMap(orderCreate.getProductIdQuantityMap())
                 .build();
+
+        return orderRepository.save(order);
+    }
+
+    public Order getOrderByOrderId(String orderId) {
+        return orderRepository.findOrderByOrderId(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("order with id: " + orderId + " does not exist"));
     }
 
     private String generateOrderId() {

@@ -2,6 +2,7 @@ package com.marketplace.marketplace.transaction;
 
 import com.marketplace.marketplace.order.Order;
 import jakarta.persistence.*;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -9,6 +10,11 @@ import java.util.Date;
 
 @Entity
 @Table(name = "transactions")
+@Builder
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class Transaction {
 
     @Id
