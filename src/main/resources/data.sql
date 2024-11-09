@@ -21,9 +21,9 @@ VALUES
   (NEXTVAL('orders_seq'), 1, NOW(), NOW(), 152, (SELECT id FROM transactions WHERE transaction_id = 'txn_001'), 'ord_001');
 
 -- Products for user 152
-INSERT INTO products (id, price, created_at, updated_at, seller_id, description, product_id, title)
+INSERT INTO products (id, price, created_at, updated_at, seller_id, description, product_id, title, quantity)
 VALUES
-  (NEXTVAL('products_seq'), 50.0, NOW(), NOW(), 152, 'Sample product description', 'prod_001', 'Sample Product');
+  (NEXTVAL('products_seq'), 50.0, NOW(), NOW(), 152, 'Sample product description', 'prod_001', 'Sample Product', 100);
 
 -- Ratings for the product by user 152
 INSERT INTO ratings (id, rating, created_at, updated_at, user_id, product_id, rating_id)
