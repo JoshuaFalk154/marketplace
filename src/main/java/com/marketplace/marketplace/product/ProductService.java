@@ -14,6 +14,7 @@ import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -128,5 +129,22 @@ public class ProductService {
         checkOwnership(user, product);
 
         productRepository.delete(product);
+    }
+
+    @Transactional
+    public Double calculatePriceIfExists(Map<String, Long> productIdQuantityMap) {
+        Double price = 0.0;
+        for (String productId: productIdQuantityMap.keySet()) {
+            Product product = getProductByProductId(productId);
+            Long quantity = productIdQuantityMap.get(productId);
+
+            if (product.getQuantity() < quantity) {
+                throw new ResourceNotFoundException("the product with id: " + productId + " does not have a quantity of " + quantity + " items in stock");
+            }
+
+            price += product.getPrice();
+        }
+
+        return price;
     }
 }

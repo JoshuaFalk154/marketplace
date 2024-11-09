@@ -4,6 +4,7 @@ import com.marketplace.marketplace.DTO.OrderCreate;
 import com.marketplace.marketplace.order.Order;
 import com.marketplace.marketplace.order.OrderService;
 import com.marketplace.marketplace.payment.PaypalService;
+import com.marketplace.marketplace.product.ProductService;
 import com.marketplace.marketplace.transaction.Transaction;
 import com.marketplace.marketplace.transaction.TransactionService;
 import com.marketplace.marketplace.transaction.TransactionStatus;
@@ -30,6 +31,7 @@ public class OrderController {
     private final PaypalService paypalService;
     private final OrderService orderService;
     private final TransactionService transactionService;
+    private final ProductService productService;
 
     @PostMapping
     public ResponseEntity<String> createOrder(@AuthenticationPrincipal User user, @RequestBody OrderCreate orderCreate) {
@@ -46,12 +48,10 @@ public class OrderController {
             @RequestParam("orderId") String orderId
     ) {
         //TODO
-        // create transaction object
-        // check quantities + product existence
-        // return amount
         // if payment successful, decrease stock amount
+
         Order order = orderService.getOrderByOrderId(orderId);
-        Double amount = 24.44;
+        Double amount = productService.calculatePriceIfExists(order.getProductIdQuantityMap());
         String transactionId = UUID.randomUUID().toString().substring(0, 13);
 
 
