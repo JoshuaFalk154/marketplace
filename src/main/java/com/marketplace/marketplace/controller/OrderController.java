@@ -47,8 +47,7 @@ public class OrderController {
             @RequestParam("description") String description,
             @RequestParam("orderId") String orderId
     ) {
-        //TODO
-        // if payment successful, decrease stock amount
+
 
         Order order = orderService.getOrderByOrderId(orderId);
         Double amount = productService.calculatePriceIfExists(order.getOrderItems());
@@ -56,8 +55,8 @@ public class OrderController {
 
 
         try {
-            String cancelUrl = "http://localhost:8080/payment/cancel?transactionId=" + transactionId;
-            String successUrl = "http://localhost:8080/payment/success?transactionId=" + transactionId;
+            String cancelUrl = "http://localhost:8080/payment/cancel?transactionId=" + transactionId + "&orderId="+orderId;
+            String successUrl = "http://localhost:8080/payment/success?transactionId=" + transactionId+ "&orderId="+orderId;
             Payment payment = paypalService.createPayment(
                     Double.valueOf(amount),
                     currency,

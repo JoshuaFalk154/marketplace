@@ -26,13 +26,12 @@ public class PaymentController {
     @GetMapping("/success")
     public String paymentSuccess(@RequestParam("paymentId") String paymentId,
                                  @RequestParam("PayerID") String payerId,
-                                 @RequestParam("transactionId") String transactionId)
-    {
+                                 @RequestParam("transactionId") String transactionId,
+                                 @RequestParam("orderId") String orderId) {
         try {
             Payment payment = paypalService.executePayment(paymentId, payerId);
             if (payment.getState().equals("approved")) {
-                //TODO
-                // orderService.finalizeOrder(paymentId);
+                orderService.finalizeOrder(orderId);
                 transactionService.transactionSuccess(transactionService.getTransactionByTransactionId(transactionId));
                 return "payment successful";
             }

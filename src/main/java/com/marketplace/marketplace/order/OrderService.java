@@ -6,9 +6,13 @@ import com.marketplace.marketplace.exceptions.ResourceNotFoundException;
 import com.marketplace.marketplace.orderItem.OrderItem;
 import com.marketplace.marketplace.product.Product;
 import com.marketplace.marketplace.product.ProductService;
+import com.marketplace.marketplace.transaction.Transaction;
+import com.marketplace.marketplace.transaction.TransactionService;
+import com.marketplace.marketplace.transaction.TransactionStatus;
 import com.marketplace.marketplace.user.User;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -17,10 +21,12 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class OrderService {
 
     private final OrderRepository orderRepository;
     private final ProductService productService;
+    private final TransactionService transactionService;
 
     public List<Order> findOrderByOwner_id(Long owner_id) {
         return orderRepository.findOrderByOwner_id(owner_id);
@@ -67,5 +73,28 @@ public class OrderService {
 
     private String generateOrderId() {
         return UUID.randomUUID().toString().substring(0, 13);
+    }
+
+    @Transactional
+    public void finalizeOrder(String orderId) {
+        Order order = getOrderByOrderId(orderId);
+        for (OrderItem item: order.getOrderItems()) {
+            Product product = item.getProduct();
+            Transaction transaction = order.getTransaction();
+            Long productQuantity = product.getQuantity();
+            Long itemQuantity = item.getQuantity();
+
+            if (productQuantity < itemQuantity) {
+                log.error("order with id {} was placed but product with id {} has not enough stock amount. please handle manually!");
+                transaction.setStatus(TransactionStatus.FAILED);
+                transactionService.save(transaction);
+                return;
+            }
+            product.setQuantity(productQuantity-itemQuantity);
+
+            // TODO
+            // save in a batch
+            productService.saveProduct(product);
+        }
     }
 }
