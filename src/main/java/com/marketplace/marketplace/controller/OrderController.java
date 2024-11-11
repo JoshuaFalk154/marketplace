@@ -51,7 +51,7 @@ public class OrderController {
         // if payment successful, decrease stock amount
 
         Order order = orderService.getOrderByOrderId(orderId);
-        Double amount = productService.calculatePriceIfExists(order.getProductIdQuantityMap());
+        Double amount = productService.calculatePriceIfExists(order.getOrderItems());
         String transactionId = UUID.randomUUID().toString().substring(0, 13);
 
 

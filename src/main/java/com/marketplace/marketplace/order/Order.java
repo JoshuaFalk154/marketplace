@@ -1,6 +1,6 @@
 package com.marketplace.marketplace.order;
 
-import com.marketplace.marketplace.product.Product;
+import com.marketplace.marketplace.orderItem.OrderItem;
 import com.marketplace.marketplace.transaction.Transaction;
 import com.marketplace.marketplace.user.User;
 import jakarta.persistence.*;
@@ -38,6 +38,9 @@ public class Order {
 
     @Transient
     private Map<String, Long> productIdQuantityMap;
+
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    private List<OrderItem> orderItems;
 
 
     @OneToOne(cascade = CascadeType.ALL)

@@ -3,6 +3,7 @@ package com.marketplace.marketplace.order;
 import com.marketplace.marketplace.DTO.OrderCreate;
 import com.marketplace.marketplace.exceptions.InvalidArgumentsException;
 import com.marketplace.marketplace.exceptions.ResourceNotFoundException;
+import com.marketplace.marketplace.orderItem.OrderItem;
 import com.marketplace.marketplace.product.Product;
 import com.marketplace.marketplace.product.ProductService;
 import com.marketplace.marketplace.user.User;
@@ -31,16 +32,30 @@ public class OrderService {
             throw new InvalidArgumentsException("order must contain at least one product");
         }
 
+
+        List<OrderItem> orderItems = new ArrayList<>();
+
         for (String productId : orderCreate.getProductIdQuantityMap().keySet()) {
-            productService.getProductByProductId(productId);
+            Product product = productService.getProductByProductId(productId);
+            OrderItem orderItem = OrderItem.builder()
+                    .quantity(orderCreate.getProductIdQuantityMap().get(productId))
+                    .product(product)
+                    .build();
+            orderItems.add(orderItem);
         }
+
 
         Order order = Order.builder()
                 .orderId(generateOrderId())
                 .status(OrderStatus.PENDING)
                 .owner(user)
                 .productIdQuantityMap(orderCreate.getProductIdQuantityMap())
+                .orderItems(orderItems)
                 .build();
+
+        for (OrderItem item : order.getOrderItems()) {
+            item.setOrder(order);
+        }
 
         return orderRepository.save(order);
     }

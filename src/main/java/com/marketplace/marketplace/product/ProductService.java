@@ -6,6 +6,7 @@ import com.marketplace.marketplace.exceptions.InvalidArgumentsException;
 import com.marketplace.marketplace.exceptions.ProductAlreadyExists;
 import com.marketplace.marketplace.exceptions.ResourceNotFoundException;
 import com.marketplace.marketplace.exceptions.ResourceNotOwnerException;
+import com.marketplace.marketplace.orderItem.OrderItem;
 import com.marketplace.marketplace.user.User;
 import com.marketplace.marketplace.utils.Mapper;
 import jakarta.transaction.Transactional;
@@ -131,18 +132,20 @@ public class ProductService {
         productRepository.delete(product);
     }
 
+    // throws exception if at least one product does not exist
     @Transactional
-    public Double calculatePriceIfExists(Map<String, Long> productIdQuantityMap) {
-        Double price = 0.0;
-        for (String productId: productIdQuantityMap.keySet()) {
-            Product product = getProductByProductId(productId);
-            Long quantity = productIdQuantityMap.get(productId);
+    public Double calculatePriceIfExists(List<OrderItem> orderItems) {
+        double price = 0.0;
+
+        for (OrderItem item: orderItems) {
+            Product product = getProductByProductId(item.getProduct().getProductId());
+            Long quantity = item.getQuantity();
 
             if (product.getQuantity() < quantity) {
-                throw new ResourceNotFoundException("the product with id: " + productId + " does not have a quantity of " + quantity + " items in stock");
+                throw new ResourceNotFoundException("the product with id: " + product.getProductId() + " does not have a quantity of " + quantity + " items in stock");
             }
 
-            price += product.getPrice();
+            price += (product.getPrice()*quantity);
         }
 
         return price;

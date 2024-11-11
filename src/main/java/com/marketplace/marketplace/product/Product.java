@@ -39,6 +39,9 @@ public class Product {
     @Column(nullable = false)
     private Long quantity;
 
+    // TODO
+    // implement soft-deletion
+
     @ManyToOne
     @JoinColumn(name = "seller_id")
     private User seller;
