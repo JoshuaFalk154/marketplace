@@ -22,6 +22,7 @@ public class Transaction {
     @Column(name = "id")
     private Long id;
 
+    // can be set to paymentId of paypal for example
     @Column(nullable = false, unique = true)
     private String transactionId;
 

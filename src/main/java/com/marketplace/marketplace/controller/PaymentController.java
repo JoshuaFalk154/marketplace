@@ -20,22 +20,25 @@ import org.springframework.web.bind.annotation.RestController;
 public class PaymentController {
 
     private final PaypalService paypalService;
-    private final OrderService orderService;
     private final TransactionService transactionService;
 
     @GetMapping("/success")
     public String paymentSuccess(@RequestParam("paymentId") String paymentId,
                                  @RequestParam("PayerID") String payerId,
-                                 @RequestParam("transactionId") String transactionId,
                                  @RequestParam("orderId") String orderId) {
+        //Transaction transaction = transactionService.getTransactionByTransactionId(paymentId);
         try {
             Payment payment = paypalService.executePayment(paymentId, payerId);
             if (payment.getState().equals("approved")) {
-                orderService.finalizeOrder(orderId);
-                transactionService.transactionSuccess(transactionService.getTransactionByTransactionId(transactionId));
+                // TODO
+                // EVENT: payment successful
+                // set transaction on success
+                // finalize order
                 return "payment successful";
             }
         } catch (PayPalRESTException e) {
+            // TODO
+            // EVENT: payment failed
             log.error("Error occurred:: ", e);
         }
 

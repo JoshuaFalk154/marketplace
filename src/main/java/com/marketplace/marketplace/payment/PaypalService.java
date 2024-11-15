@@ -1,14 +1,21 @@
 package com.marketplace.marketplace.payment;
 
+import com.marketplace.marketplace.order.Order;
+import com.marketplace.marketplace.order.OrderService;
+import com.marketplace.marketplace.product.ProductService;
+import com.marketplace.marketplace.transaction.TransactionService;
+import com.marketplace.marketplace.transaction.TransactionStatus;
 import com.paypal.api.payments.*;
 import com.paypal.base.rest.APIContext;
 import com.paypal.base.rest.PayPalRESTException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -65,4 +72,27 @@ public class PaypalService {
         return payment.execute(apiContext, paymentExecution);
     }
 
+    public Optional<URI> processPayment(String method, String currency, String description, Double amount, String orderId, String cancelUrl, String successUrl) throws PayPalRESTException {
+        Payment payment = createPayment(
+                amount,
+                currency,
+                method,
+                "sale",
+                description,
+                cancelUrl,
+                successUrl
+        );
+
+        // TODO
+        // EVENT payment created successful
+
+        return extractApprovalUrl(payment);
+    }
+
+    private Optional<URI> extractApprovalUrl(Payment payment) {
+        return payment.getLinks().stream()
+                .filter(link -> link.getRel().equals("approval_url"))
+                .map(link -> URI.create(link.getHref()))
+                .findFirst();
+    }
 }

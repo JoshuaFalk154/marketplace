@@ -4,6 +4,8 @@ import com.marketplace.marketplace.exceptions.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 public class TransactionService {
@@ -30,4 +32,8 @@ public class TransactionService {
         transaction.setStatus(TransactionStatus.SUCCESS);
         save(transaction);
     }
+
+//    public String generateTransactionId() {
+//        return UUID.randomUUID().toString().substring(0, 13);
+//    }
 }
