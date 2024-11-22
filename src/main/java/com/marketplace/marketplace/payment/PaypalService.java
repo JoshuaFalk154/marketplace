@@ -1,5 +1,8 @@
 package com.marketplace.marketplace.payment;
 
+import com.marketplace.marketplace.DTO.PaymentRequest;
+import com.marketplace.marketplace.DTO.PaymentResponse;
+import com.marketplace.marketplace.exceptions.PaymentException;
 import com.marketplace.marketplace.order.Order;
 import com.marketplace.marketplace.order.OrderService;
 import com.marketplace.marketplace.product.ProductService;
@@ -19,7 +22,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class PaypalService {
+public class PaypalService implements PaymentService {
 
     private final APIContext apiContext;
 
@@ -72,21 +75,58 @@ public class PaypalService {
         return payment.execute(apiContext, paymentExecution);
     }
 
-    public Optional<URI> processPayment(String method, String currency, String description, Double amount, String orderId, String cancelUrl, String successUrl) throws PayPalRESTException {
-        Payment payment = createPayment(
-                amount,
-                currency,
-                method,
-                "sale",
-                description,
-                cancelUrl,
-                successUrl
-        );
+//    public Optional<URI> processPayment(String method, String currency, String description, Double amount, String orderId, String cancelUrl, String successUrl) throws PayPalRESTException {
+//        Payment payment = createPayment(
+//                amount,
+//                currency,
+//                method,
+//                "sale",
+//                description,
+//                cancelUrl,
+//                successUrl
+//        );
+//
+//        // TODO
+//        // EVENT payment created successful
+//
+//        return extractApprovalUrl(payment);
+//    }
+
+    @Override
+    public PaymentResponse processPayment(PaymentRequest request) throws PaymentException {
+        Payment payment;
+        try {
+            payment = createPayment(
+                    request.getAmount(),
+                    request.getCurrency(),
+                    request.getMethod(),
+                    "sale",
+                    request.getDescription(),
+                    request.getCancelUrl(),
+                    request.getSuccessUrl()
+            );
+        } catch (PayPalRESTException e) {
+            throw new PaymentException("Error processing PayPal payment", e);
+        }
 
         // TODO
         // EVENT payment created successful
 
-        return extractApprovalUrl(payment);
+        return PaymentResponse.builder()
+                .approvalUrl(extractApprovalUrl(payment))
+                .isCompleted(false)
+                .transactionId(Optional.of(payment.getId()))
+                .build();
+    }
+
+    @Override
+    public String getSuccessUrl(String orderId) {
+        return "http://localhost:8080/payment/success?transactionId=" + "&orderId=" + orderId;
+    }
+
+    @Override
+    public String getCancelUrl(String orderId) {
+        return "http://localhost:8080/payment/cancel?transactionId=" + "&orderId=" + orderId;
     }
 
     private Optional<URI> extractApprovalUrl(Payment payment) {

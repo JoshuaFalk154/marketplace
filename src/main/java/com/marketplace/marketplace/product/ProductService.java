@@ -132,22 +132,4 @@ public class ProductService {
         productRepository.delete(product);
     }
 
-    // throws exception if at least one product does not exist
-    @Transactional
-    public Double calculatePriceIfExists(List<OrderItem> orderItems) {
-        double price = 0.0;
-
-        for (OrderItem item: orderItems) {
-            Product product = getProductByProductId(item.getProduct().getProductId());
-            Long quantity = item.getQuantity();
-
-            if (product.getQuantity() < quantity) {
-                throw new ResourceNotFoundException("the product with id: " + product.getProductId() + " does not have a quantity of " + quantity + " items in stock");
-            }
-
-            price += (product.getPrice()*quantity);
-        }
-
-        return price;
-    }
 }

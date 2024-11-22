@@ -1,17 +1,17 @@
 package com.marketplace.marketplace.payment;
 
-import lombok.RequiredArgsConstructor;
+import com.marketplace.marketplace.DTO.PaymentRequest;
+import com.marketplace.marketplace.DTO.PaymentResponse;
+import com.marketplace.marketplace.exceptions.PaymentException;
 import org.springframework.stereotype.Service;
 
-@Service
-@RequiredArgsConstructor
-public class PaymentService {
+public interface PaymentService {
 
-    public String successUrl(String orderId) {
-        return "http://localhost:8080/payment/success?transactionId=" + "&orderId=" + orderId;
-    }
+    PaymentResponse processPayment(PaymentRequest request) throws PaymentException;
 
-    public String cancelUrl(String orderId) {
-        return "http://localhost:8080/payment/cancel?transactionId=" + "&orderId=" + orderId;
-    }
+    String getSuccessUrl(String orderId);
+
+    String getCancelUrl(String orderId);
+
+
 }
