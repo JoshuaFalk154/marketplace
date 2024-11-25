@@ -75,22 +75,6 @@ public class PaypalService implements PaymentService {
         return payment.execute(apiContext, paymentExecution);
     }
 
-//    public Optional<URI> processPayment(String method, String currency, String description, Double amount, String orderId, String cancelUrl, String successUrl) throws PayPalRESTException {
-//        Payment payment = createPayment(
-//                amount,
-//                currency,
-//                method,
-//                "sale",
-//                description,
-//                cancelUrl,
-//                successUrl
-//        );
-//
-//        // TODO
-//        // EVENT payment created successful
-//
-//        return extractApprovalUrl(payment);
-//    }
 
     @Override
     public PaymentResponse processPayment(PaymentRequest request) throws PaymentException {

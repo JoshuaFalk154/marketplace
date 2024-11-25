@@ -75,26 +75,26 @@ public class OrderService {
         return UUID.randomUUID().toString().substring(0, 13);
     }
 
-    @Transactional
-    public void finalizeOrder(String orderId) {
-        Order order = getOrderByOrderId(orderId);
-        for (OrderItem item: order.getOrderItems()) {
-            Product product = item.getProduct();
-            Transaction transaction = order.getTransaction();
-            Long productQuantity = product.getQuantity();
-            Long itemQuantity = item.getQuantity();
-
-            if (productQuantity < itemQuantity) {
-                log.error("order with id {} was placed but product with id {} has not enough stock amount. please handle manually!");
-                transaction.setStatus(TransactionStatus.FAILED);
-                transactionService.save(transaction);
-                return;
-            }
-            product.setQuantity(productQuantity-itemQuantity);
-
-            // TODO
-            // save in a batch
-            productService.saveProduct(product);
-        }
-    }
+//    @Transactional
+//    public void finalizeOrder(String orderId) {
+//        Order order = getOrderByOrderId(orderId);
+//        for (OrderItem item: order.getOrderItems()) {
+//            Product product = item.getProduct();
+//            Transaction transaction = order.getTransaction();
+//            Long productQuantity = product.getQuantity();
+//            Long itemQuantity = item.getQuantity();
+//
+//            if (productQuantity < itemQuantity) {
+//                log.error("order with id {} was placed but product with id {} has not enough stock amount. please handle manually!");
+//                transaction.setStatus(TransactionStatus.FAILED);
+//                transactionService.save(transaction);
+//                return;
+//            }
+//            product.setQuantity(productQuantity-itemQuantity);
+//
+//            // TODO
+//            // save in a batch
+//            productService.saveProduct(product);
+//        }
+//    }
 }

@@ -17,7 +17,7 @@ public class OrderItemService {
 
     // throws exception if at least one product does not exist
     @Transactional
-    public Double calculatePriceIfExists(List<OrderItem> orderItems) {
+    public Double calculatePrice(List<OrderItem> orderItems) {
         double price = 0.0;
 
         for (OrderItem item: orderItems) {

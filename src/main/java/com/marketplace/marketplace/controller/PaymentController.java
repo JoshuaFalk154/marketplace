@@ -47,7 +47,9 @@ public class PaymentController {
 
     @GetMapping("/cancel")
     public String paymentCancel(@RequestParam("transactionId") String transactionId) {
-        transactionService.transactionFail(transactionService.getTransactionByTransactionId(transactionId));
+        // EVENT: payment failed
+        // transaction failed
+        //transactionService.transactionFail(transactionService.getTransactionByTransactionId(transactionId));
         return "payment canceled";
     }
 
