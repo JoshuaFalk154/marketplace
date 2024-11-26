@@ -28,4 +28,4 @@ VALUES
 -- Ratings for the product by user 152
 INSERT INTO ratings (id, rating, created_at, updated_at, user_id, product_id, rating_id)
 VALUES
-  (NEXTVAL('ratings_seq'), 5, NOW(), NOW(), 152, (SELECT id FROM products WHERE product_id = 'prod_001'), 'rate_001');
+  (NEXTVAL('ratings_seq'), 3, NOW(), NOW(), 152, (SELECT id FROM products WHERE product_id = 'prod_001'), 'rate_001');

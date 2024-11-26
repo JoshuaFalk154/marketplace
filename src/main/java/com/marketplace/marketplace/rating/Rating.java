@@ -24,7 +24,9 @@ public class Rating {
     @Column(nullable = false, unique = true)
     private String ratingId;
 
-    private Integer rating;
+    //private Integer rating;
+    @Column(nullable = false)
+    private Stars rating;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
