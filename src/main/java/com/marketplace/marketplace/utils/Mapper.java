@@ -36,4 +36,6 @@ public interface Mapper {
     ProductUpdated productToProductUpdated(Product product);
 
     Product productUpdateToProduct(ProductUpdate productUpdate);
+
+    RatingResponse ratingToRatingResponse(Rating rating);
 }
