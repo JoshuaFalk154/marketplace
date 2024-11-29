@@ -26,13 +26,13 @@ public class RatingController {
     public ResponseEntity<RatingResponse> createRating(@RequestBody @Validated RatingCreate ratingCreate, @AuthenticationPrincipal User user) {
         Rating rating = ratingService.createRating(ratingCreate, user);
         RatingResponse response = mapper.ratingToRatingResponse(rating);
-        return  new ResponseEntity<>(response, HttpStatus.CREATED);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteRating(@PathVariable String id) {
         ratingService.deleteByRatingId(id);
-        return new ResponseEntity<>("Sucessfully deleted rating with id "+id, HttpStatus.OK);
+        return new ResponseEntity<>("Sucessfully deleted rating with id " + id, HttpStatus.OK);
     }
 
 }

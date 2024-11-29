@@ -1,6 +1,7 @@
 package com.marketplace.marketplace.rating;
 
 import com.marketplace.marketplace.DTO.RatingCreate;
+import com.marketplace.marketplace.exceptions.InvalidArgumentsException;
 import com.marketplace.marketplace.exceptions.ResourceNotFoundException;
 import com.marketplace.marketplace.product.Product;
 import com.marketplace.marketplace.product.ProductRepository;
@@ -29,8 +30,12 @@ public class RatingService {
     }
 
     @Transactional
-    public Rating createRating(RatingCreate ratingCreate, User user) {
+    public Rating createRating(@Validated RatingCreate ratingCreate, User user) {
         Product product = productService.getProductByProductId(ratingCreate.getProductId());
+        ratingRepository.findRatingByProduct_idAndUser_id(product.getId(), user.getId())
+                .ifPresent(r ->
+                        {throw  new InvalidArgumentsException("User with id + " + user.getEmail() +
+                                " has already rated product with id " + product.getProductId());});
 
         Rating rating = Rating.builder()
                 .ratingId(createRatingId())
