@@ -32,6 +32,7 @@ public class RatingService {
     @Transactional
     public Rating createRating(@Validated RatingCreate ratingCreate, User user) {
         Product product = productService.getProductByProductId(ratingCreate.getProductId());
+
         ratingRepository.findRatingByProduct_idAndUser_id(product.getId(), user.getId())
                 .ifPresent(r ->
                         {throw  new InvalidArgumentsException("User with id + " + user.getEmail() +
