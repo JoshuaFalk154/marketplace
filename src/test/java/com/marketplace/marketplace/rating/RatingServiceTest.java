@@ -15,9 +15,11 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -144,4 +146,123 @@ public class RatingServiceTest {
         assertThatThrownBy(() -> ratingService.createRating(ratingCreate, user))
                 .isInstanceOf(InvalidArgumentsException.class);
     }
+
+    @Test
+    void deleteRatingByRatingIdAsOwner_AllFine_DeleteRating() {
+        User user = User.builder()
+                .id(11L)
+                .email("user@mail.com")
+                .build();
+
+        Product product = Product.builder()
+                .id(1111L)
+                .productId("someid")
+                .title("title1235")
+                .description("description is this")
+                .price(23.44)
+                .quantity(333L)
+                .build();
+
+        Rating rating = Rating.builder()
+                .ratingId("ratingId")
+                .rating(Stars.FIVE)
+                .user(user)
+                .product(product)
+                .build();
+
+        user.setReviews(List.of(rating));
+        product.setRatings(List.of(rating));
+
+        RatingService mock = spy(ratingService);
+        doReturn(rating).when(mock).findByRatingId(rating.getRatingId());
+        doNothing().when(ratingRepository).delete(any(Rating.class));
+
+        mock.deleteRatingByRatingIdAsOwner(rating.getRatingId(), user);
+
+        verify(ratingRepository, times(1)).delete(rating);
+    }
+
+    @Test
+    void deleteRatingByRatingIdAsOwner_RatingNotExist_Exception() {
+        User user = User.builder()
+                .id(11L)
+                .email("user@mail.com")
+                .build();
+
+        Product product = Product.builder()
+                .id(1111L)
+                .productId("someid")
+                .title("title1235")
+                .description("description is this")
+                .price(23.44)
+                .quantity(333L)
+                .build();
+
+        RatingService mock = spy(ratingService);
+        doThrow(new ResourceNotFoundException("")).when(mock).findByRatingId("notexistid");
+
+        assertThatThrownBy(() -> mock.deleteRatingByRatingIdAsOwner("notexistid", user))
+                .isInstanceOf(ResourceNotFoundException.class);
+    }
+
+    @Test
+    void deleteRatingByRatingIdAsOwner_NoOwner_Exception() {
+        User user = User.builder()
+                .id(11L)
+                .email("user@mail.com")
+                .build();
+
+        User owner = User.builder()
+                .id(222L)
+                .email("owner@mail.com")
+                .build();
+
+        Product product = Product.builder()
+                .id(1111L)
+                .productId("someid")
+                .title("title1235")
+                .description("description is this")
+                .price(23.44)
+                .quantity(333L)
+                .build();
+
+        Rating rating = Rating.builder()
+                .ratingId("ratingId")
+                .rating(Stars.FIVE)
+                .user(owner)
+                .product(product)
+                .build();
+
+        owner.setReviews(List.of(rating));
+        product.setRatings(List.of(rating));
+
+        RatingService spyService = spy(ratingService);
+        doReturn(rating).when(spyService).findByRatingId(rating.getRatingId());
+
+        assertThatThrownBy(() -> spyService.deleteRatingByRatingIdAsOwner(rating.getRatingId(), user))
+                .isInstanceOf(InvalidArgumentsException.class);
+    }
+    @Test
+    void findByRatingId_AllFine_Rating() {
+        Rating rating = Rating.builder()
+                .ratingId("ratingId")
+                .rating(Stars.FIVE)
+                .build();
+
+        doReturn(Optional.of(rating)).when(ratingRepository).findRatingByRatingId(rating.getRatingId());
+        Rating result = ratingService.findByRatingId(rating.getRatingId());
+
+        assertThat(result).isNotNull();
+        assertThat(result).isEqualTo(rating);
+    }
+
+    @Test
+    void findByRatingId_RatingNotExist_Exception() {
+        String ratingId = "someIdffajdkfj3344";
+        doReturn(Optional.empty()).when(ratingRepository).findRatingByRatingId(ratingId);
+
+        assertThatThrownBy(() -> ratingService.findByRatingId(ratingId))
+                .isInstanceOf(ResourceNotFoundException.class);
+    }
+
 }

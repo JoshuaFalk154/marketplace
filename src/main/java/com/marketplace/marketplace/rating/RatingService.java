@@ -48,10 +48,21 @@ public class RatingService {
     }
 
     public void deleteByRatingId(String id) {
-        Rating rating = ratingRepository.findRatingByRatingId(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Rating with id " + id + " not found."));
-
+        Rating rating = findByRatingId(id);
         ratingRepository.delete(rating);
+    }
+
+    public void deleteRatingByRatingIdAsOwner(String id, User user) {
+        Rating rating = findByRatingId(id);
+        if (!user.equals(rating.getUser())) {
+            throw new InvalidArgumentsException("user with email " + user.getEmail() + " is not owner of rating with id " + id);
+        }
+        ratingRepository.delete(rating);
+    }
+
+    public Rating findByRatingId(String ratingId) {
+        return ratingRepository.findRatingByRatingId(ratingId)
+                .orElseThrow(() -> new ResourceNotFoundException("Rating with id " + ratingId + " not found."));
     }
 
     private String createRatingId() {

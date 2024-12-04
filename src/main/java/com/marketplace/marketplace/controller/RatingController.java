@@ -30,8 +30,8 @@ public class RatingController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteRating(@PathVariable String id) {
-        ratingService.deleteByRatingId(id);
+    public ResponseEntity<String> deleteRating(@PathVariable String id, @AuthenticationPrincipal User user) {
+        ratingService.deleteRatingByRatingIdAsOwner(id, user);
         return new ResponseEntity<>("Sucessfully deleted rating with id " + id, HttpStatus.OK);
     }
 
