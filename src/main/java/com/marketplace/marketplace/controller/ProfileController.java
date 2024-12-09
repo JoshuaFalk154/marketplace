@@ -37,7 +37,6 @@ public class ProfileController {
         UserResponse userResponse = mapper.userToUserResponse(user);
 
         return new ResponseEntity<>(userResponse, HttpStatus.OK);
-
     }
 
 }

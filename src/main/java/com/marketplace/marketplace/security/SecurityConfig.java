@@ -22,6 +22,7 @@ public class SecurityConfig {
         return http.authorizeHttpRequests(authorize -> {
                     authorize.requestMatchers("/orders").permitAll();
                     authorize.requestMatchers("/payment/**").permitAll();
+                    authorize.requestMatchers("**").permitAll();
                     authorize.anyRequest().authenticated();
                 })
                 .oauth2ResourceServer((oauth2) -> oauth2.jwt(jwt ->
