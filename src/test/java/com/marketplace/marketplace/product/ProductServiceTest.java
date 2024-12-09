@@ -3,7 +3,7 @@ package com.marketplace.marketplace.product;
 import com.marketplace.marketplace.DTO.ProductCreate;
 import com.marketplace.marketplace.DTO.ProductUpdate;
 import com.marketplace.marketplace.exceptions.InvalidArgumentsException;
-import com.marketplace.marketplace.exceptions.ProductAlreadyExists;
+import com.marketplace.marketplace.exceptions.ProductAlreadyExistsException;
 import com.marketplace.marketplace.exceptions.ResourceNotFoundException;
 import com.marketplace.marketplace.exceptions.ResourceNotOwnerException;
 import com.marketplace.marketplace.user.User;
@@ -139,7 +139,7 @@ public class ProductServiceTest {
         doReturn(true).when(productServiceMock).productExists(any(Product.class));
 
         assertThatThrownBy(() -> productServiceMock.createProduct(seller, createProduct))
-                .isInstanceOf(ProductAlreadyExists.class);
+                .isInstanceOf(ProductAlreadyExistsException.class);
     }
 
     @ParameterizedTest

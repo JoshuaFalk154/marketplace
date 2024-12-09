@@ -3,10 +3,9 @@ package com.marketplace.marketplace.product;
 import com.marketplace.marketplace.DTO.ProductCreate;
 import com.marketplace.marketplace.DTO.ProductUpdate;
 import com.marketplace.marketplace.exceptions.InvalidArgumentsException;
-import com.marketplace.marketplace.exceptions.ProductAlreadyExists;
+import com.marketplace.marketplace.exceptions.ProductAlreadyExistsException;
 import com.marketplace.marketplace.exceptions.ResourceNotFoundException;
 import com.marketplace.marketplace.exceptions.ResourceNotOwnerException;
-import com.marketplace.marketplace.orderItem.OrderItem;
 import com.marketplace.marketplace.user.User;
 import com.marketplace.marketplace.utils.Mapper;
 import jakarta.transaction.Transactional;
@@ -15,7 +14,6 @@ import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -34,7 +32,7 @@ public class ProductService {
         product.setSeller(seller);
 
         if (productExists(product)) {
-            throw new ProductAlreadyExists("product with following id already exists: " + product.getProductId());
+            throw new ProductAlreadyExistsException("product with following id already exists: " + product.getProductId());
         }
 
         return saveProduct(product);
