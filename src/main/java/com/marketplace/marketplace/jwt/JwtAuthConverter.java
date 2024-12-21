@@ -32,10 +32,12 @@ public class JwtAuthConverter implements Converter<Jwt, AbstractAuthenticationTo
     @Override
     public AbstractAuthenticationToken convert(@NonNull Jwt jwt) {
         User user = loadUser(jwt);
+
         Collection<GrantedAuthority> authorities = Stream.concat(
                 jwtGrantedAuthoritiesConverter.convert(jwt).stream(),
                 extractResourceRoles(jwt).stream()
         ).collect(Collectors.toSet());
+
         user.setRoles(authorities.stream().toList());
 
         AbstractAuthenticationToken token = new CustomAuthenticationToken(user, authorities);

@@ -27,6 +27,7 @@ public class ProductService {
         return productRepository.findProductsBySeller_id(seller_id);
     }
 
+    @Transactional
     public Product createProduct(User seller, ProductCreate productCreate) {
         Product product = mapper.productCreateToProduct(productCreate);
         product.setSeller(seller);

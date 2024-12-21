@@ -38,7 +38,6 @@ public class ProductController {
     public ResponseEntity<List<ProductRequested>> getProducts(@RequestParam Optional<Integer> size,
                                                               @RequestParam Optional<String> title,
                                                               @RequestParam Optional<Double> maxPrice) {
-
         List<Product> products = productService.getProductsWithParams(size, title, maxPrice);
         List<ProductRequested> response = mapper.listProductsToListProductRequested(products);
 
@@ -46,7 +45,7 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ProductRequested> getProductByProductId(@PathVariable String id) {
+    public ResponseEntity<ProductRequested> getProduct(@PathVariable String id) {
         Product product = productService.getProductByProductId(id);
         ProductRequested response = mapper.productToProductRequested(product);
 
